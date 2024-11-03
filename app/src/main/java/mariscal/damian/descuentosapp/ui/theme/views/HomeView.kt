@@ -24,6 +24,7 @@ import mariscal.damian.descuentosapp.components.MainButton
 import mariscal.damian.descuentosapp.components.MainTextField
 import mariscal.damian.descuentosapp.components.SpaceH
 import mariscal.damian.descuentosapp.components.TwoCards
+import mariscal.damian.descuentosapp.components.alert
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,6 +54,7 @@ fun ContentHomeView(paddingValues: PaddingValues){
         var descuento by remember { mutableStateOf("") }
         var precioDescuento by remember { mutableStateOf(0.0) }
         var totalDescuento by remember { mutableStateOf(0.0) }
+        var showAlert by remember { mutableStateOf(false) }
 
         TwoCards(
             title1 = "Total",
@@ -67,12 +69,39 @@ fun ContentHomeView(paddingValues: PaddingValues){
         MainTextField(value = descuento, onValueChange = {descuento = it}, label = "Descuento")
         SpaceH(10.dp)
         MainButton(text = "Generar descuento") {
-
+            if (precio != "" && descuento != ""){
+                precioDescuento = calcularPrecio(precio.toDouble(), descuento.toDouble())
+                totalDescuento = calcularDescuento(precio.toDouble(), descuento.toDouble())
+            }else{
+                showAlert = true
+            }
         }
 
         SpaceH()
-        MainButton(text = "Limpiar ", color = Color.Red) {
 
+        MainButton(text = "Limpiar ", color = Color.Red) {
+            precio = ""
+            descuento = ""
+            precioDescuento = 0.0
+            totalDescuento = 0.0
+        }
+        if (showAlert){
+            alert(
+                title = "Error",
+                message = "Debes ingresar un precio y un descuento",
+                confirmText = "Aceptar",
+                onConfirmClick = { showAlert = false }) { }
+                
         }
     }
+}
+
+fun  calcularPrecio(precio: Double, descuento: Double): Double{
+    val res = precio - calcularDescuento(precio, descuento)
+    return kotlin.math.round(res * 100) / 100.0
+}
+
+fun calcularDescuento(precio: Double, descuento: Double): Double {
+    val res = precio * (1 - descuento / 100)
+    return kotlin.math.round(res * 100) / 100.0
 }
